@@ -1,5 +1,7 @@
 # Regras do Jogo
 
+![img](https://raw.githubusercontent.com/the-akira/MarioJumper/main/imagens/screenshot.png)
+
 - Você deve desviar dos inimigos, seja rápido.
 - As moedas aparecem em posições aleatórias, para vencer é necessário coletar 20 moedas.
 - Se a barra verde acabar (ou seja, sua vida zerou) significa que você perdeu.
