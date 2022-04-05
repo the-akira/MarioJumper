@@ -1,12 +1,14 @@
 # Mario Jumper
 
+Desenvolvido para o Desafio Simplicode.
+
 ![img](https://raw.githubusercontent.com/the-akira/MarioJumper/main/imagens/screenshot.png)
 
 ## Instalação
 
-Para jogar o game é necessário ter o [Python](https://www.python.org/downloads/) instalado em sua máquina.
+Para jogar Mario Jumper é necessário ter o [Python](https://www.python.org/downloads/) instalado em sua máquina.
 
-Faça a clonagem do repositório em sua máquina:
+Realize a clonagem do repositório em sua máquina:
 
 ```
 git clone https://github.com/the-akira/MarioJumper.git
@@ -35,5 +37,5 @@ Boa diversão!
 
 ## Controles
 
-- Use as setas do teclado para mover (<- esquerda) e (direita ->)
+- Use as setas do teclado para mover (:arrow_left: esquerda) e (direita :arrow_right:)
 - Use a barra de espaço para pular
