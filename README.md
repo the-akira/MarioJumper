@@ -6,7 +6,7 @@ Desenvolvido para o Desafio Simplicode.
 
 ## Instalação
 
-Para jogar Mario Jumper é necessário ter o [Python](https://www.python.org/downloads/) instalado em sua máquina.
+Para jogar **Mario Jumper** é necessário ter o [Python](https://www.python.org/downloads/) instalado em sua máquina.
 
 Realize a clonagem do repositório:
 
@@ -37,5 +37,5 @@ Boa diversão!
 
 ## Controles
 
-- Use as setas do teclado para mover (:arrow_left: esquerda) e (direita :arrow_right:)
-- Use a barra de espaço para pular
+- Use as **setas do teclado** para mover o personagem (:arrow_left: esquerda) e (direita :arrow_right:)
+- Use a **barra de espaço** para pular
