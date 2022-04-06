@@ -23,7 +23,7 @@ python3 -m pip install -U pygame --user
 Dentro do diretório principal, execute o jogo através do comando:
 
 ```
-python main.py
+python3 main.py
 ```
 
 Boa diversão!
@@ -37,5 +37,5 @@ Boa diversão!
 
 ## Controles
 
-- Use as setas do teclado para mover [:arrow_left: esquerda] e [direita :arrow_right:]
+- Use as setas do teclado para mover (:arrow_left: esquerda) e (direita :arrow_right:)
 - Use a barra de espaço para pular
