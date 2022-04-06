@@ -15,7 +15,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Mario Jumper')
 clock = pygame.time.Clock()
 background = pygame.transform.scale(pygame.image.load('images/bg.png').convert_alpha(), (WIDTH, HEIGHT))
-game_over = 0
+game_over = False
 victory = None
 main_menu = True
 
@@ -136,38 +136,6 @@ class Thwomp(pygame.sprite.Sprite):
             self.move_direction *= -1
             self.move_counter *= -1
 
-class Coin(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('images/coin.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-        self.rect.x = x 
-        self.rect.y = y
-
-    def update(self):
-        new_x = randrange(20,WIDTH - 100)
-        new_y = randrange(20,HEIGHT - 150)
-        self.rect.x = new_x 
-        self.rect.y = new_y
-
-class Mushroom(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('images/mushroom.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-        self.rect.x = x 
-        self.rect.y = y
-
-    def update(self):
-        new_x = randrange(20,WIDTH - 100)
-        new_y = 380
-        self.rect.x = new_x 
-        self.rect.y = new_y
-
 class Goomba(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
@@ -188,6 +156,37 @@ class Goomba(pygame.sprite.Sprite):
             self.y_speed = 5
         if self.rect.left > WIDTH:
             self.rect.right = 0
+
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y, scale):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('images/coin.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.rect.x = x 
+        self.rect.y = y
+
+    def update(self):
+        new_x = randrange(20,WIDTH - 100)
+        new_y = randrange(55,HEIGHT - 200)
+        self.rect.x = new_x 
+        self.rect.y = new_y
+
+class Mushroom(pygame.sprite.Sprite):
+    def __init__(self, x, y, scale):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('images/mushroom.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.rect.x = x 
+        self.rect.y = y
+
+    def update(self):
+        new_x = randrange(20,WIDTH - 100)
+        self.rect.x = new_x 
+        self.rect.y = 380
 
 class HealthBar():
     def __init__(self, x, y, health, max_health):
@@ -247,6 +246,7 @@ mushroom_timer = pygame.USEREVENT + 2
 pygame.time.set_timer(mushroom_timer, 10_000) 
 
 health_bar = HealthBar(10, 10, mario.health, mario.health)
+
 restart_img = pygame.image.load('images/restart_btn.png').convert_alpha()
 restart_button = Button(WIDTH // 2 - 60, HEIGHT // 2 - 50, restart_img)
 
@@ -280,11 +280,11 @@ while running:
             life_fx.play()
 
         if mario.is_mario_dead():
-            game_over = 1
+            game_over = True
             victory = False
 
         if mario.score == 20:
-            game_over = 1
+            game_over = True
             victory = True
 
         mario_group.draw(screen)
@@ -304,7 +304,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == coin_timer:
-            coin = Coin(randrange(20,WIDTH - 100), randrange(20,HEIGHT - 150), 0.13)
+            coin = Coin(randrange(20,WIDTH - 100), randrange(55,HEIGHT - 200), 0.13)
             coin_group.add(coin)
             coin_group.update()
         if event.type == mushroom_timer:
@@ -318,7 +318,7 @@ while running:
         else:
             draw_text('Você PERDEU!', font, BLACK, (WIDTH // 2) - 70, HEIGHT // 2)
         if restart_button.draw():
-            game_over = 0
+            game_over = False
             mario.reset(5, 450)
             mushroom_group.empty()
             coin_group.empty()
