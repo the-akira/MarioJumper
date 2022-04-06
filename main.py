@@ -14,7 +14,14 @@ font = pygame.font.SysFont(None, 30)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Mario Jumper')
 clock = pygame.time.Clock()
-bg = pygame.transform.scale(pygame.image.load('imagens/bg.png').convert_alpha(), (WIDTH, HEIGHT))
+background = pygame.transform.scale(pygame.image.load('images/bg.png').convert_alpha(), (WIDTH, HEIGHT))
+game_over = 0
+victory = None
+main_menu = True
+
+music = pygame.mixer.Sound('sounds/music.wav')
+music.set_volume(0.2)
+music.play(loops=-1)
 
 coin_fx = pygame.mixer.Sound('sounds/coin.wav')
 coin_fx.set_volume(0.4)
@@ -25,14 +32,14 @@ damage_fx.set_volume(0.2)
 life_fx = pygame.mixer.Sound('sounds/life.wav')
 life_fx.set_volume(0.25)
 
-def desenhar_texto(text, font, text_color, x, y):
+def draw_text(text, font, text_color, x, y):
     img = font.render(text, True, text_color)
     screen.blit(img, (x, y))
 
 class Mario(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-        self.img = pygame.image.load('imagens/mario.png').convert_alpha()
+        self.img = pygame.image.load('images/mario.png').convert_alpha()
         self.image = pygame.transform.scale(self.img, (int(self.img.get_width() * scale), int(self.img.get_height() * scale)))
         self.new_image = pygame.transform.scale(self.img, (int(self.img.get_width() * scale), int(self.img.get_height() * scale)))
         self.flipped = pygame.transform.flip(self.image, True, False)
@@ -45,7 +52,7 @@ class Mario(pygame.sprite.Sprite):
         self.health = 5
         self.damage_cooldown = 0
         self.last_damage = pygame.time.get_ticks()
-        self.pontuacao = 0
+        self.score = 0
         self.moving_right = False
         self.moving_left = False
 
@@ -83,7 +90,7 @@ class Mario(pygame.sprite.Sprite):
         self.rect.x += dx 
         self.rect.y += dy
 
-    def tomar_dano(self):
+    def take_damage(self):
         now = pygame.time.get_ticks()
         if now - self.last_damage > self.damage_cooldown:
             self.last_damage = now
@@ -91,22 +98,30 @@ class Mario(pygame.sprite.Sprite):
             self.health -= 1
             self.damage_cooldown = 500
 
-    def is_personagem_morto(self):
+    def is_mario_dead(self):
         return self.health <= 0
 
-    def aumentar_vida(self):
+    def gain_life(self):
         self.health += 1
         if self.health >= 5:
             self.health = 5
     
-    def aumentar_pontuacao(self):
-        self.pontuacao += 1
+    def gain_score(self):
+        self.score += 1
+
+    def reset(self, x, y):
+        self.health = 5
+        self.score = 0
+        self.rect.x = x
+        self.rect.y = y
+        self.jump_count = 10
+        self.image = self.new_image
 
 class Thwomp(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('imagens/thwomp.png').convert_alpha()
-        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        self.image = pygame.image.load('images/thwomp.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.rect.x = x 
@@ -124,8 +139,8 @@ class Thwomp(pygame.sprite.Sprite):
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('imagens/coin.png').convert_alpha()
-        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        self.image = pygame.image.load('images/coin.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.rect.x = x 
@@ -140,8 +155,8 @@ class Coin(pygame.sprite.Sprite):
 class Mushroom(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('imagens/mushroom.png').convert_alpha()
-        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        self.image = pygame.image.load('images/mushroom.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.rect.x = x 
@@ -156,8 +171,8 @@ class Mushroom(pygame.sprite.Sprite):
 class Goomba(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('imagens/goomba.png').convert_alpha()
-        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        self.image = pygame.image.load('images/goomba.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * scale), int(self.image.get_height() * scale)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.rect.x = x 
@@ -188,13 +203,40 @@ class HealthBar():
         pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
         pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
 
-mario_group = pygame.sprite.Group()
+class Button():
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x 
+        self.rect.y = y 
+        self.clicked = False
+
+    def draw(self):
+        action = False
+        pos = pygame.mouse.get_pos()
+
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+        screen.blit(self.image, self.rect)
+        return action
+
+mario_group = pygame.sprite.GroupSingle()
 mario = Mario(5, 450, 0.4)
 mario_group.add(mario)
 
-thwomp_group = pygame.sprite.Group()
+thwomp_group = pygame.sprite.GroupSingle()
 thwomp = Thwomp(150, 450, 0.22)
 thwomp_group.add(thwomp)
+
+goomba_group = pygame.sprite.GroupSingle()
+goomba = Goomba(150, 220, 0.20)
+goomba_group.add(goomba)
 
 coin_group = pygame.sprite.Group()
 coin_timer = pygame.USEREVENT + 1
@@ -204,15 +246,59 @@ mushroom_group = pygame.sprite.Group()
 mushroom_timer = pygame.USEREVENT + 2
 pygame.time.set_timer(mushroom_timer, 10_000) 
 
-goomba_group = pygame.sprite.Group()
-goomba = Goomba(150, 220, 0.20)
-goomba_group.add(goomba)
-
 health_bar = HealthBar(10, 10, mario.health, mario.health)
+restart_img = pygame.image.load('images/restart_btn.png').convert_alpha()
+restart_button = Button(WIDTH // 2 - 60, HEIGHT // 2 - 50, restart_img)
+
+start_img = pygame.image.load('images/start_btn.png').convert_alpha()
+start_button = Button(WIDTH // 2 - 60, HEIGHT // 2 - 50, start_img)
+
+exit_img = pygame.image.load('images/exit_btn.png').convert_alpha()
+exit_button = Button(WIDTH // 2 - 60, HEIGHT // 2, exit_img)
 
 running = True
 while running:
     clock.tick(FPS)
+    screen.blit(background,(0,0))
+
+    if main_menu:
+        if exit_button.draw():
+            running = False
+        if start_button.draw():
+            main_menu = False
+
+    elif not game_over:
+        if pygame.sprite.spritecollide(mario, thwomp_group, False) or pygame.sprite.spritecollide(mario, goomba_group, False):
+            mario.take_damage()
+
+        if pygame.sprite.spritecollide(mario, coin_group, True):
+            mario.gain_score()
+            coin_fx.play()
+
+        if pygame.sprite.spritecollide(mario, mushroom_group, True):
+            mario.gain_life()
+            life_fx.play()
+
+        if mario.is_mario_dead():
+            game_over = 1
+            victory = False
+
+        if mario.score == 20:
+            game_over = 1
+            victory = True
+
+        mario_group.draw(screen)
+        thwomp_group.draw(screen)
+        health_bar.draw(mario.health)
+        goomba_group.draw(screen)
+        coin_group.draw(screen)
+        mushroom_group.draw(screen)
+
+        draw_text(f'Pontos: {mario.score}', font, BLACK, 240, 10)
+
+        mario_group.update()
+        thwomp_group.update()
+        goomba_group.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -226,34 +312,17 @@ while running:
             mushroom_group.add(mushroom)
             mushroom_group.update()
 
-    if pygame.sprite.spritecollide(mario, thwomp_group, False) or pygame.sprite.spritecollide(mario, goomba_group, False):
-        mario.tomar_dano()
-
-    if pygame.sprite.spritecollide(mario, coin_group, True):
-        mario.aumentar_pontuacao()
-        coin_fx.play()
-
-    if pygame.sprite.spritecollide(mario, mushroom_group, True):
-        mario.aumentar_vida()
-        life_fx.play()
-
-    if mario.is_personagem_morto() or mario.pontuacao == 20:
-        running = False
-
-    screen.blit(bg,(0,0))
-
-    mario_group.draw(screen)
-    thwomp_group.draw(screen)
-    health_bar.draw(mario.health)
-    goomba_group.draw(screen)
-    coin_group.draw(screen)
-    mushroom_group.draw(screen)
-
-    desenhar_texto(f'Pontos: {mario.pontuacao}', font, BLACK, 240, 10)
+    if game_over:
+        if victory:
+            draw_text('Você VENCEU!', font, BLACK, (WIDTH // 2) - 70, HEIGHT // 2)
+        else:
+            draw_text('Você PERDEU!', font, BLACK, (WIDTH // 2) - 70, HEIGHT // 2)
+        if restart_button.draw():
+            game_over = 0
+            mario.reset(5, 450)
+            mushroom_group.empty()
+            coin_group.empty()
 
     pygame.display.update()
-    mario_group.update()
-    thwomp_group.update()
-    goomba_group.update()
 
 pygame.quit()
