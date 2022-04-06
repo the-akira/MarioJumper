@@ -2,7 +2,7 @@
 
 Desenvolvido para o Desafio Simplicode.
 
-![img](https://raw.githubusercontent.com/the-akira/MarioJumper/main/imagens/screenshot.png)
+![img](https://raw.githubusercontent.com/the-akira/MarioJumper/main/images/screenshot.png)
 
 ## Instalação
 
