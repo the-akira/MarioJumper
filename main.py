@@ -303,6 +303,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p and not game_over:
+                main_menu = True
         if event.type == coin_timer:
             coin = Coin(randrange(20,WIDTH - 100), randrange(55,HEIGHT - 200), 0.13)
             coin_group.add(coin)
