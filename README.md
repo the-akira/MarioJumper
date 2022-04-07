@@ -37,6 +37,8 @@ Boa diversão!
 
 ## Controles
 
-- `arrow keys`: para mover o personagem (:arrow_left:) e (:arrow_right:)
+- `arrow keys`: para mover o personagem
+	- Esquerda: :arrow_left: 
+	- Direita: :arrow_right:
 - `barra de espaço`: para pular
 - `p`: para pausar o jogo
