@@ -53,8 +53,6 @@ class Mario(pygame.sprite.Sprite):
         self.damage_cooldown = 0
         self.last_damage = pygame.time.get_ticks()
         self.score = 0
-        self.moving_right = False
-        self.moving_left = False
 
     def update(self):
         dx = 0 
@@ -77,14 +75,10 @@ class Mario(pygame.sprite.Sprite):
 
         if key[pygame.K_LEFT] and self.rect.left > 0:
             dx -= 6
-            self.moving_left = True
-            self.moving_right = False
             self.image = self.flipped
 
         if key[pygame.K_RIGHT] and self.rect.right < WIDTH:
             dx += 6
-            self.moving_right = True
-            self.moving_left = False
             self.image = self.new_image
 
         self.rect.x += dx 
