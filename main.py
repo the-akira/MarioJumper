@@ -306,11 +306,11 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p and not game_over:
                 main_menu = True
-        if event.type == coin_timer:
+        if event.type == coin_timer and not main_menu:
             coin = Coin(randrange(20,WIDTH - 100), randrange(55,HEIGHT - 200), 0.13)
             coin_group.add(coin)
             coin_group.update()
-        if event.type == mushroom_timer:
+        if event.type == mushroom_timer and not main_menu:
             mushroom = Mushroom(randrange(20,WIDTH - 100), 380, 0.13)
             mushroom_group.add(mushroom)
             mushroom_group.update()
