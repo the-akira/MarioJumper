@@ -39,25 +39,12 @@ def draw_text(text, font, text_color, x, y):
 class Mario(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-        self.img = pygame.image.load('images/mario.png').convert_alpha()
-        self.image = pygame.transform.scale(self.img, (int(self.img.get_width() * scale), int(self.img.get_height() * scale)))
-        self.new_image = pygame.transform.scale(self.img, (int(self.img.get_width() * scale), int(self.img.get_height() * scale)))
-        self.flipped = pygame.transform.flip(self.image, True, False)
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-        self.rect.x = x 
-        self.rect.y = y
-        self.is_jump = False
-        self.jump_count = 10
-        self.health = 5
-        self.damage_cooldown = 0
-        self.last_damage = pygame.time.get_ticks()
-        self.score = 0
+        self.reset(x, y, scale)
 
     def update(self):
         dx = 0 
         dy = 0
-
+        walk_cooldown = 4
         key = pygame.key.get_pressed()
 
         if not self.is_jump:
@@ -73,12 +60,35 @@ class Mario(pygame.sprite.Sprite):
                 if self.rect.y < 450:
                     self.rect.y = 450
 
-        if key[pygame.K_LEFT] and self.rect.left > 0:
+        if key[pygame.K_LEFT]:
             dx -= 6
-            self.image = self.flipped
-        if key[pygame.K_RIGHT] and self.rect.right < WIDTH:
+            self.counter += 1
+            self.direction = -1
+            if self.rect.left <= 0:
+                self.rect.left = 0
+        if key[pygame.K_RIGHT]:
             dx += 6
-            self.image = self.new_image
+            self.counter += 1
+            self.direction = 1
+            if self.rect.right >= 350:
+                self.rect.right = 350
+        if key[pygame.K_LEFT] == False and key[pygame.K_RIGHT] == False:
+            self.counter = 0
+            self.index = 0
+            if self.direction == 1:
+                self.image = self.images_right[self.index]
+            if self.direction == -1:
+                self.image = self.images_left[self.index]
+
+        if self.counter > walk_cooldown:
+            self.counter = 0
+            self.index += 1 
+            if self.index >= len(self.images_right):
+                self.index = 0
+            if self.direction == 1:
+                self.image = self.images_right[self.index]
+            if self.direction == -1:
+                self.image = self.images_left[self.index]
 
         self.rect.x += dx 
         self.rect.y += dy
@@ -87,8 +97,8 @@ class Mario(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
         if now - self.last_damage > self.damage_cooldown:
             self.last_damage = now
-            damage_fx.play()
             self.health -= 1
+            damage_fx.play()
             self.damage_cooldown = 500
 
     def is_mario_dead(self):
@@ -104,14 +114,29 @@ class Mario(pygame.sprite.Sprite):
         self.score += 1
         coin_fx.play()
 
-    def reset(self, x, y):
-        self.health = 5
-        self.score = 0
-        self.rect.x = x
+    def reset(self, x, y, scale):
+        self.images_right = []
+        self.images_left = []
+        self.index = 0
+        self.counter = 0
+        for num in range(1,4):
+            img_right = pygame.image.load(f'images/Mario/{num}.png').convert_alpha()
+            img_right = pygame.transform.scale(img_right, (int(img_right.get_width() * scale), int(img_right.get_height() * scale)))
+            img_left = pygame.transform.flip(img_right, True, False)
+            self.images_right.append(img_right)
+            self.images_left.append(img_left)   
+        self.image = self.images_right[self.index]     
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.rect.x = x 
         self.rect.y = y
         self.is_jump = False
         self.jump_count = 10
-        self.image = self.new_image
+        self.health = 5
+        self.damage_cooldown = 0
+        self.last_damage = pygame.time.get_ticks()
+        self.score = 0
+        self.direction = 0
 
 class Thwomp(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
@@ -184,7 +209,7 @@ class Mushroom(pygame.sprite.Sprite):
         self.rect.x = new_x 
         self.rect.y = 380
 
-class HealthBar():
+class HealthBar:
     def __init__(self, x, y, health, max_health):
         self.x = x 
         self.y = y 
@@ -198,7 +223,7 @@ class HealthBar():
         pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
         pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
 
-class Button():
+class Button:
     def __init__(self, x, y, image):
         self.image = image
         self.rect = self.image.get_rect()
@@ -316,7 +341,7 @@ while running:
             draw_text('Você PERDEU!', font, BLACK, (WIDTH // 2) - 70, HEIGHT // 2)
         if restart_button.draw():
             game_over = False
-            mario.reset(5, 450)
+            mario.reset(5, 450, 0.4)
             mushroom_group.empty()
             coin_group.empty()
 
