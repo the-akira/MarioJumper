@@ -245,10 +245,10 @@ restart_img = pygame.image.load('images/restart_btn.png').convert_alpha()
 restart_button = Button(WIDTH // 2 - 60, HEIGHT // 2 - 50, restart_img)
 
 start_img = pygame.image.load('images/start_btn.png').convert_alpha()
-start_button = Button(WIDTH // 2 - 60, HEIGHT // 2 - 50, start_img)
+start_button = Button(WIDTH // 2 - 60, HEIGHT // 2 - 60, start_img)
 
 exit_img = pygame.image.load('images/exit_btn.png').convert_alpha()
-exit_button = Button(WIDTH // 2 - 60, HEIGHT // 2, exit_img)
+exit_button = Button(WIDTH // 2 - 60, HEIGHT // 2 - 10, exit_img)
 
 running = True
 while running:
