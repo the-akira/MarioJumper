@@ -76,7 +76,6 @@ class Mario(pygame.sprite.Sprite):
         if key[pygame.K_LEFT] and self.rect.left > 0:
             dx -= 6
             self.image = self.flipped
-
         if key[pygame.K_RIGHT] and self.rect.right < WIDTH:
             dx += 6
             self.image = self.new_image
@@ -97,17 +96,20 @@ class Mario(pygame.sprite.Sprite):
 
     def gain_life(self):
         self.health += 1
+        life_fx.play()
         if self.health >= 5:
             self.health = 5
     
     def gain_score(self):
         self.score += 1
+        coin_fx.play()
 
     def reset(self, x, y):
         self.health = 5
         self.score = 0
         self.rect.x = x
         self.rect.y = y
+        self.is_jump = False
         self.jump_count = 10
         self.image = self.new_image
 
@@ -264,14 +266,12 @@ while running:
     elif not game_over:
         if pygame.sprite.spritecollide(mario, thwomp_group, False) or pygame.sprite.spritecollide(mario, goomba_group, False):
             mario.take_damage()
-
+            
         if pygame.sprite.spritecollide(mario, coin_group, True):
             mario.gain_score()
-            coin_fx.play()
 
         if pygame.sprite.spritecollide(mario, mushroom_group, True):
             mario.gain_life()
-            life_fx.play()
 
         if mario.is_mario_dead():
             game_over = True
